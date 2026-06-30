@@ -1,0 +1,202 @@
+Golang Assignment  — Data Processing Pipeline 
+Goal
+Design and implement a robust, concurrent data processing pipeline that ingests data from multiple sources, validates and transforms records according to business rules, computes aggregations, and exports results — all while supporting observability, error collection, cancellation, and automated tests.
+Scope & Deliverables
+Deliverables
+Working pipeline implementation (Go)
+REST API for managing pipeline jobs (see endpoints below)
+Unit and integration tests
+README with architecture diagram, run instructions, and example requests
+Sample input files (CSV, JSON) and example API responses
+A short report (≤1 page) summarizing design choices, concurrency model, and trade-offs
+Functional Requirements
+Core Features
+Data Ingestion
+Support reading from multiple input sources: CSV files, JSON files, and external HTTP APIs.
+Allow configurable source definitions per job.
+Data Validation
+Validate records against schema and business rules.
+Filter or mark invalid records while continuing processing.
+Data Transformation
+Apply business rules and transformations (type conversions, normalization, enrichment).
+Data Aggregation
+Compute required statistics (e.g., counts, sums, averages, group-by aggregations).
+Data Export
+Persist processed data and aggregations to a database and/or files (CSV/JSON).
+Support configurable export targets per job.
+Progress Tracking
+Track and expose job progress (records processed, records pending, percent complete).
+Error Handling
+Collect, store, and expose errors and failed-record details for inspection.
+Non-Functional / Technical Requirements
+Pipeline Architecture
+Multi-stage pipeline implemented using goroutines, where each stage performs a single responsibility (ingest ➜ validate ➜ transform ➜ aggregate ➜ export).
+Channels
+Use Go channels to connect pipeline stages and pass typed records safely between stages.
+Context
+Use context.Context to implement cancellation and timeouts for jobs and external calls.
+Fan-out / Fan-in
+Support parallel processing within stages using worker pools (fan-out) with controlled concurrency and then merge results (fan-in).
+Error Collection
+Aggregate errors produced by any stage into a centralized error store (in-memory or persistent) that can be queried via API.
+Monitoring & Metrics
+Expose basic metrics: records processed, processing rate (records/sec), error counts, stage latencies.
+Provide a REST endpoint to fetch progress and metrics.
+Testing
+Provide unit tests for core components (parsers, validators, transformers).
+Integration tests that run a full pipeline on sample data and assert expected outputs and metrics.
+API — Job Management & Observability
+REST Endpoints
+POST   /api/v1/pipelines              - Create pipeline job
+GET    /api/v1/pipelines              - List pipeline jobs
+GET    /api/v1/pipelines/:id          - Get pipeline job details
+GET    /api/v1/pipelines/:id/progress - Get pipeline progress & metrics
+GET    /api/v1/pipelines/:id/results  - Retrieve job results (or link to export)
+GET    /api/v1/pipelines/:id/errors   - Retrieve job errors and failed records
+PATCH  /api/v1/pipelines/:id/cancel   - Cancel running pipeline job
+DELETE /api/v1/pipelines/:id          - Delete job and its artifacts
+​
+Notes
+POST /api/v1/pipelines should accept a job specification that includes input sources, transformations, aggregation definitions, export targets, and concurrency/configuration options.
+Progress endpoint must return structured status including percent complete, processed count, error count, start time, and (if finished) end time.
+Suggested Implementation Details (optional guidance)
+Language / Framework: Go (goroutines + channels). Use standard net/http for API. Use database/sql or an ORM for exports.
+Serialization: Use encoding/csv and encoding/json for file parsing.
+Worker Pools: Parameterize worker pool sizes per stage to allow tuning.
+Persistence: Use SQLite/Postgres for storing job metadata, results links, and errors.
+Observability: Expose a /metrics endpoint compatible with Prometheus (optional).
+Configuration: Job spec as JSON; allow overrides via environment variables for local testing.
+Acceptance Criteria
+Pipeline runs end-to-end on sample inputs and produces correct aggregated results.
+System supports cancellation and gracefully stops workers.
+Progress and errors are queryable via the API.
+Tests cover validation, transformation, and an end-to-end run.
+README explains how to build, run, test, and call the API.
+     ┌─────────────────┐
+     │ Source Readers  │ (CSV/JSON/API)
+     └──────┬──────────┘
+            │ (records)
+            ▼
+     ┌─────────────────┐
+     │ Validation Stage│
+     └──────┬──────────┘
+            │ (valid records)
+            ▼
+     ┌─────────────────┐
+     │ Transform Stage │
+     └──────┬──────────┘
+            │ (transformed records)
+            ▼
+     ┌─────────────────┐
+     │ Aggregation     │
+     └──────┬──────────┘
+            │ (summaries)
+            ▼
+     ┌─────────────────┐
+     │ Export Stage    │
+     └─────────────────┘
+
+​
+Where to Use Goroutines & Channels
+Ingestion (CSV/JSON/API Reads)
+ Use goroutines: one per source
+ Use channel: send parsed records → recordsCh
+Validation Stage
+ Use goroutines: multiple worker goroutines (fan-out)
+ Use channels:
+input: recordsCh
+output: validatedCh
+errors: errorCh
+Transformation Stage
+ Use goroutines: multiple workers in parallel
+ Use channel: validatedCh → transformedCh
+Aggregation Stage
+ Usually single goroutine (fan-in stage)
+Can parallelize partial aggregations using worker goroutines + merge channel (partialAggCh → finalAggCh)
+Export Stage
+ Use goroutine: one to consume resultCh and write to DB/files
+Progress Tracking
+ Use goroutine: one to listen on progressCh and update metrics
+Error Handling
+ Use goroutine: one to listen on errorCh and collect all errors
+In short:
+Each pipeline stage = a goroutine (or a pool of goroutines).
+Data moves forward through channels (recordsCh → validatedCh → transformedCh → resultCh).
+Errors and progress are reported via side channels (errorCh, progressCh).
+Sample Data Sources for Each Input Type
+1.CSV Sources
+You can download or directly read CSV files via HTTP URLs.
+Purpose
+Source
+Example URL
+Global Population
+Kaggle (CSV download)
+https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv
+Iris Dataset
+UCI Machine Learning
+https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
+COVID-19 Data
+Our World in Data
+https://covid.ourworldindata.org/data/owid-covid-data.csv
+Use in Go:
+resp, _ := http.Get("https://covid.ourworldindata.org/data/owid-covid-data.csv")
+r := csv.NewReader(resp.Body)
+​
+2.JSON APIs
+For simulating JSON ingestion or REST-based data fetching.
+Purpose
+API
+Example Endpoint
+Placeholder data (users, posts, comments)
+JSONPlaceholder
+https://jsonplaceholder.typicode.com/posts
+Fake users for testing
+RandomUser API
+https://randomuser.me/api/?results=10
+Cryptocurrency data
+CoinGecko API
+https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd
+Weather info
+Open-Meteo (Free)
+https://api.open-meteo.com/v1/forecast?latitude=20&longitude=85&current_weather=true
+Use in Go:
+resp, _ := http.Get("https://jsonplaceholder.typicode.com/posts")
+defer resp.Body.Close()
+json.NewDecoder(resp.Body).Decode(&data)
+​
+3.Mixed Data Simulation
+You can mix multiple sources to test concurrency and transformation logic:
+Source Type
+Example
+Description
+CSV
+COVID dataset
+Parse and extract “date”, “cases”, “deaths”
+JSON
+CoinGecko API
+Fetch crypto prices
+API
+Open-Meteo
+Fetch temperature data
+Then transform and aggregate them into a “Global Daily Report” combining multiple data types — a perfect concurrency test case.
+4. Database Export Targets (Optional)
+For the Data Export stage:
+Use SQLite (github.com/mattn/go-sqlite3) — simplest option.
+Or PostgreSQL for real concurrency testing (github.com/lib/pq).
+Example End-to-End Flow
+Sources:
+  - CSV (COVID Data)
+  - JSON API (CoinGecko Prices)
+  - REST API (Open-Meteo)
+
+Pipeline:
+  ingestion → validation → transformation → aggregation → export(DB + file)
+
+Goroutines:
+  - 3 ingestion goroutines (fan-out)
+  - 5 validation/transform workers
+  - 1 aggregation goroutine (fan-in)
+  - 1 export goroutine
+  - 1 progress tracker
+  - 1 error collector
+​

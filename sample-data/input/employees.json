@@ -1,0 +1,20 @@
+[
+  {
+    "id": 6,
+    "name": "Diana Prince",
+    "department": "Engineering",
+    "salary": "95000"
+  },
+  {
+    "id": 7,
+    "name": "Bruce Wayne",
+    "department": "Executive",
+    "salary": "150000"
+  },
+  {
+    "id": 8,
+    "name": "Clark Kent",
+    "department": "Marketing",
+    "salary": "70000"
+  }
+]

@@ -1,0 +1,9 @@
+date,cases,deaths,region
+2023-01-01,150,2,North America
+2023-01-02,200,3,North America
+2023-01-01,100,1,Europe
+2023-01-02,120,2,Europe
+2023-01-01,50,0,Asia
+2023-01-02,60,1,Asia
+2023-01-03,invalid,0,Asia
+2023-01-03,80,1,Unknown
