@@ -1,0 +1,27 @@
+#!/bin/sh
+# commit-msg hook to validate Conventional Commits
+
+# Commit message file is passed as the first argument
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Regular expression for Conventional Commits
+# Format: type(scope)?: subject
+# Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+REGEX="^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-zA-Z0-9_-]+\))?: .+"
+
+if ! echo "$COMMIT_MSG" | grep -Eq "$REGEX"; then
+  echo "❌ Invalid commit message format."
+  echo "Commit messages must follow the Conventional Commits specification:"
+  echo "  type(scope?): subject"
+  echo ""
+  echo "Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+  echo "Example: feat(api): add new users endpoint"
+  echo ""
+  echo "Your commit message was:"
+  echo "$COMMIT_MSG"
+  exit 1
+fi
+
+echo "✅ Commit message format is valid."
+exit 0

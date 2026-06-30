@@ -1,92 +1,118 @@
 # Data Processing Pipeline
 
-A Go project scaffold for a data processing pipeline with API entrypoints, ingestion, validation, transformation, aggregation, export, storage, and metrics layers.
+A robust, concurrent Go data processing pipeline that ingests data from CSV/JSON/API sources, processes records via generic validation, transformation, and aggregation rules, and exports the finalized records. 
 
-## Architecture
-
-![Architecture Diagram](docs/architecture-diagram.png)
-
-## Project Structure
-
-```text
-data-processing-pipeline/
-├── cmd/
-│   └── server/
-│       └── main.go
-├── internal/
-│   ├── api/
-│   │   ├── handler.go
-│   │   ├── router.go
-│   │   └── middleware.go
-│   ├── pipeline/
-│   │   ├── pipeline.go
-│   │   ├── worker_pool.go
-│   │   ├── progress.go
-│   │   ├── metrics.go
-│   │   └── errors.go
-│   ├── ingestion/
-│   │   ├── csv.go
-│   │   ├── json.go
-│   │   └── api.go
-│   ├── validation/
-│   │   └── validator.go
-│   ├── transformation/
-│   │   └── transformer.go
-│   ├── aggregation/
-│   │   └── aggregator.go
-│   ├── export/
-│   │   ├── sqlite.go
-│   │   ├── csv.go
-│   │   └── json.go
-│   ├── models/
-│   │   ├── job.go
-│   │   ├── record.go
-│   │   └── metrics.go
-│   └── storage/
-│       └── sqlite.go
-├── test/
-│   ├── integration/
-│   ├── unit/
-│   └── testdata/
-├── sample-data/
-│   ├── input/
-│   └── output/
-├── go.mod
-├── go.sum
-└── README.md
-```
+## Features
+- **Highly Concurrent**: Multi-stage pipeline using Goroutines and Channels.
+- **Resilient**: Captures validation and execution errors at every stage in a persistent SQLite database instead of halting.
+- **Observable**: A fully-featured REST API allowing job creation, cancellation, status tracking, and error querying.
+- **Configurable**: Define your data sources, rules, aggregations, and SQLite/CSV/JSON export targets purely via JSON.
 
 ## Components
+- `cmd/server`: HTTP server entrypoint.
+- `internal/api/routes`: Route definitions and middleware.
+- `internal/api/controllers`: HTTP request handlers.
+- `internal/api/services`: Core business logic and job orchestration.
+- `internal/api/repositories`: Data access layer interfaces and models.
+- `internal/pipeline`: Orchestrator, channels, worker pool execution, and context management.
+- `internal/ingestion`: Connectors for JSON APIs, and CSV/JSON files.
+- `internal/validation` & `internal/transformation`: Worker nodes applying configurable business rules.
+- `internal/aggregation`: Fan-in aggregation logic.
+- `internal/export`: Configurable multi-target export (SQLite, CSV, JSON).
+- `internal/storage`: SQLite repository implementation (`storage.SQLiteStore`).
 
-- `cmd/server`: Application entrypoint for the HTTP server.
-- `internal/api`: HTTP routing, handlers, and middleware.
-- `internal/pipeline`: Pipeline orchestration, worker pool, progress, metrics, and errors.
-- `internal/ingestion`: Input readers for CSV, JSON, and API sources.
-- `internal/validation`: Record validation.
-- `internal/transformation`: Record transformation.
-- `internal/aggregation`: Data aggregation.
-- `internal/export`: Exporters for SQLite, CSV, and JSON outputs.
-- `internal/models`: Shared domain models.
-- `internal/storage`: Storage adapters.
-- `test`: Unit, integration, and test data folders.
-- `sample-data`: Example input and output data folders.
+## Sample Data
+The project includes sample input files located in the `sample-data/input/` directory to help you test the pipeline:
+- `employees.json` / `employees.csv`: Basic employee records to test validation and string transformations (e.g., uppercasing names).
+- `covid.csv`: Time-series data ideal for testing numeric aggregations (e.g., summing cases).
+- `crypto.json`: Cryptocurrency market data to test complex data processing and grouping.
 
 ## Getting Started
 
-Run the server:
+1. **Install dependencies:**
+   ```bash
+   go mod tidy
+   ```
 
-```bash
-go run ./cmd/server
-```
+2. **Run the server:**
+   ```bash
+   go run ./cmd/server
+   ```
+   (Optional: override `SERVER_ADDR` or `DB_PATH` environment variables).
 
-Check health:
+3. **Run tests (Unit & Integration):**
+   ```bash
+   # Run all tests
+   go test -v ./...
+   
+   # Check test coverage (>90% for API layers)
+   go test -coverprofile=coverage.out ./...
+   go tool cover -func=coverage.out
+   
+   # View coverage in browser
+   go tool cover -html=coverage.out
+   ```
 
+4. **Code Formatting & Linting:**
+   Ensure your code complies with the project standards before committing:
+   ```bash
+   # Format code
+   make format
+   
+   # Run the linter
+   make lint
+   
+   # Configure git hooks to run format and lint automatically on commit
+   make setup-hooks
+   ```
+
+5. **API Documentation (Swagger UI):**
+   The project includes a built-in Swagger UI to explore and test the API visually.
+   1. Start the server (`go run ./cmd/server`)
+   2. Open your web browser and navigate to: [http://localhost:8080/docs/](http://localhost:8080/docs/)
+
+## Example API Requests
+
+### 1. Check Health
 ```bash
 curl http://localhost:8080/health
 ```
 
-Run tests:
-
+### 2. Create a Pipeline Job
+This example fetches a JSON list, validates it, transforms it, aggregates the scores, and exports to a SQLite table.
 ```bash
-go test ./...
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sources": [
+        {"type": "json", "url": "https://jsonplaceholder.typicode.com/users"}
+    ],
+    "validations": [
+        {"field": "id", "type": "int", "required": true}
+    ],
+    "transformations": [
+        {"field": "name", "action": "uppercase"}
+    ],
+    "exports": [
+        {"type": "sqlite", "table": "users_export"},
+        {"type": "json", "path": "output.json"}
+    ],
+    "worker_count": 5
+  }'
+```
+
+### 3. Track Progress & Metrics
+Replace `<job-id>` with the ID returned by the POST request.
+```bash
+curl http://localhost:8080/api/v1/pipelines/<job-id>/progress
+```
+
+### 4. Fetch Failed Records / Errors
+```bash
+curl http://localhost:8080/api/v1/pipelines/<job-id>/errors
+```
+
+### 5. Cancel Running Job
+```bash
+curl -X PATCH http://localhost:8080/api/v1/pipelines/<job-id>/cancel
 ```

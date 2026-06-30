@@ -1,0 +1,5 @@
+[
+{"group":"Sales","sum_salary":65000}
+{"group":"Marketing","sum_salary":72000}
+{"group":"Engineering","sum_salary":175000}
+{"group":"HR","sum_salary":60000}

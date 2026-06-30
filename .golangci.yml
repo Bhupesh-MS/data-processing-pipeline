@@ -1,0 +1,57 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  gocyclo:
+    min-complexity: 40
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  revive:
+    rules:
+      - name: exported
+        disabled: true
+  errcheck:
+    exclude-functions:
+      - (*database/sql.DB).Close
+      - (*database/sql.Rows).Close
+      - (io.ReadCloser).Close
+      - (io.Writer).Write
+      - (*os.File).Close
+      - (*os.File).WriteString
+      - os.Remove
+      - encoding/json.Unmarshal
+      - (*encoding/json.Encoder).Encode
+      - (*encoding/json.Decoder).Decode
+      - (*database/sql.Rows).Scan
+      - fmt.Sscanf
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).CreateJob
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).UpdateJobStatus
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).SaveError
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).UpdateProgress
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - staticcheck
+    - ineffassign
+    - typecheck
+    - gosimple
+    - unused
+    - gofmt
+    - goimports
+    - gocyclo
+    - misspell
+    - revive
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
