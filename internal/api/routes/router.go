@@ -10,7 +10,7 @@ func NewRouter(controller *controllers.JobController) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", controller.Health)
-	
+
 	mux.HandleFunc("POST /api/v1/pipelines", controller.CreateJob)
 	mux.HandleFunc("GET /api/v1/pipelines", controller.ListJobs)
 	mux.HandleFunc("GET /api/v1/pipelines/{id}", controller.GetJob)
@@ -19,6 +19,9 @@ func NewRouter(controller *controllers.JobController) http.Handler {
 	mux.HandleFunc("GET /api/v1/pipelines/{id}/errors", controller.GetJobErrors)
 	mux.HandleFunc("PATCH /api/v1/pipelines/{id}/cancel", controller.CancelJob)
 	mux.HandleFunc("DELETE /api/v1/pipelines/{id}", controller.DeleteJob)
+
+	// Serve Swagger UI and swagger.json
+	mux.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("docs"))))
 
 	return LoggingMiddleware(mux)
 }

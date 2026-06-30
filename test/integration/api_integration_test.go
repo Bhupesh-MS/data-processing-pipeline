@@ -21,7 +21,7 @@ func TestAPIIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	orchestrator := pipeline.NewOrchestrator(store)
 	jobService := services.NewJobService(store, orchestrator)
@@ -44,10 +44,10 @@ func TestAPIIntegration(t *testing.T) {
 	}
 
 	var job models.Job
-	if err := json.NewDecoder(resp.Body).Decode(&job); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&job); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if job.ID == "" {
 		t.Fatalf("expected job ID, got empty")
@@ -61,7 +61,7 @@ func TestAPIIntegration(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected 200, got %v", resp.StatusCode)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	// 3. List Jobs
 	resp, err = http.Get(ts.URL + "/api/v1/pipelines")
@@ -72,8 +72,8 @@ func TestAPIIntegration(t *testing.T) {
 		t.Errorf("expected 200, got %v", resp.StatusCode)
 	}
 	var jobs []models.Job
-	json.NewDecoder(resp.Body).Decode(&jobs)
-	resp.Body.Close()
+	_ = json.NewDecoder(resp.Body).Decode(&jobs)
+	_ = resp.Body.Close()
 	if len(jobs) != 1 {
 		t.Errorf("expected 1 job in list, got %d", len(jobs))
 	}
@@ -86,5 +86,5 @@ func TestAPIIntegration(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected 200 for progress, got %v", resp.StatusCode)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 }

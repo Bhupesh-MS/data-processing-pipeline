@@ -78,7 +78,7 @@ func TestFullPipeline(t *testing.T) {
 
 	var createdJob models.Job
 	json.NewDecoder(w.Body).Decode(&createdJob)
-	
+
 	// 6. Wait for job to finish
 	time.Sleep(3 * time.Second) // wait a bit for background goroutines
 
@@ -120,4 +120,3 @@ func TestFullPipeline(t *testing.T) {
 		t.Errorf("expected count_score 2, got %f", countScore)
 	}
 }
-

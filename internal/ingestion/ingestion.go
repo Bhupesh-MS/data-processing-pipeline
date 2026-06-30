@@ -20,7 +20,7 @@ func RunIngestion(ctx context.Context, sources []models.SourceConfig, outCh chan
 		wg.Add(1)
 		go func(source models.SourceConfig) {
 			defer wg.Done()
-			
+
 			switch source.Type {
 			case "csv":
 				processCSV(ctx, source, outCh, errCh, jobID)
@@ -122,7 +122,7 @@ func processJSON(ctx context.Context, source models.SourceConfig, outCh chan<- m
 	defer reader.Close()
 
 	decoder := json.NewDecoder(reader)
-	
+
 	// Expect array of objects
 	t, err := decoder.Token()
 	if err != nil || t != json.Delim('[') {

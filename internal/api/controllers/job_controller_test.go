@@ -143,7 +143,7 @@ func TestJobController_ListJobs(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("expected %v, got %v", http.StatusOK, status)
 	}
-	
+
 	svc.listJobsErr = errors.New("err")
 	rr = httptest.NewRecorder()
 	ctrl.ListJobs(rr, req)

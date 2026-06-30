@@ -111,7 +111,7 @@ func TestJobService_CreateJob(t *testing.T) {
 	if job.Status != models.JobStatusPending {
 		t.Errorf("expected status pending, got %v", job.Status)
 	}
-	
+
 	// Check orchestrator was not called immediately in a blocking way (it's called in goroutine, but we can't easily assert here without waiting. Let's just assume it runs).
 }
 

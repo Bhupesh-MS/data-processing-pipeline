@@ -16,32 +16,32 @@ func TestTransformRecord(t *testing.T) {
 		verify  func(*models.Record) bool
 	}{
 		{
-			name: "lowercase",
-			record: &models.Record{Attributes: map[string]any{"name": "JOHN"}},
-			rules: []models.TransformRule{{Field: "name", Action: "lowercase"}},
+			name:    "lowercase",
+			record:  &models.Record{Attributes: map[string]any{"name": "JOHN"}},
+			rules:   []models.TransformRule{{Field: "name", Action: "lowercase"}},
 			wantErr: false,
-			verify: func(r *models.Record) bool { return r.Attributes["name"] == "john" },
+			verify:  func(r *models.Record) bool { return r.Attributes["name"] == "john" },
 		},
 		{
-			name: "to_int",
-			record: &models.Record{Attributes: map[string]any{"age": "25"}},
-			rules: []models.TransformRule{{Field: "age", Action: "to_int"}},
+			name:    "to_int",
+			record:  &models.Record{Attributes: map[string]any{"age": "25"}},
+			rules:   []models.TransformRule{{Field: "age", Action: "to_int"}},
 			wantErr: false,
-			verify: func(r *models.Record) bool { return r.Attributes["age"] == 25 },
+			verify:  func(r *models.Record) bool { return r.Attributes["age"] == 25 },
 		},
 		{
-			name: "target_rename",
-			record: &models.Record{Attributes: map[string]any{"age": "25"}},
-			rules: []models.TransformRule{{Field: "age", Action: "to_int", Target: "age_int"}},
+			name:    "target_rename",
+			record:  &models.Record{Attributes: map[string]any{"age": "25"}},
+			rules:   []models.TransformRule{{Field: "age", Action: "to_int", Target: "age_int"}},
 			wantErr: false,
-			verify: func(r *models.Record) bool { return r.Attributes["age_int"] == 25 },
+			verify:  func(r *models.Record) bool { return r.Attributes["age_int"] == 25 },
 		},
 		{
-			name: "to_int error",
-			record: &models.Record{Attributes: map[string]any{"age": "twenty"}},
-			rules: []models.TransformRule{{Field: "age", Action: "to_int"}},
+			name:    "to_int error",
+			record:  &models.Record{Attributes: map[string]any{"age": "twenty"}},
+			rules:   []models.TransformRule{{Field: "age", Action: "to_int"}},
 			wantErr: true,
-			verify: func(r *models.Record) bool { return true },
+			verify:  func(r *models.Record) bool { return true },
 		},
 	}
 
@@ -69,7 +69,7 @@ func TestRunTransformation(t *testing.T) {
 	close(inCh)
 
 	RunTransformation(context.Background(), inCh, outCh, errCh, rules, "job-1")
-	
+
 	close(outCh)
 	close(errCh)
 

@@ -21,6 +21,12 @@ A robust, concurrent Go data processing pipeline that ingests data from CSV/JSON
 - `internal/export`: Configurable multi-target export (SQLite, CSV, JSON).
 - `internal/storage`: SQLite repository implementation (`storage.SQLiteStore`).
 
+## Sample Data
+The project includes sample input files located in the `sample-data/input/` directory to help you test the pipeline:
+- `employees.json` / `employees.csv`: Basic employee records to test validation and string transformations (e.g., uppercasing names).
+- `covid.csv`: Time-series data ideal for testing numeric aggregations (e.g., summing cases).
+- `crypto.json`: Cryptocurrency market data to test complex data processing and grouping.
+
 ## Getting Started
 
 1. **Install dependencies:**
@@ -46,6 +52,24 @@ A robust, concurrent Go data processing pipeline that ingests data from CSV/JSON
    # View coverage in browser
    go tool cover -html=coverage.out
    ```
+
+4. **Code Formatting & Linting:**
+   Ensure your code complies with the project standards before committing:
+   ```bash
+   # Format code
+   make format
+   
+   # Run the linter
+   make lint
+   
+   # Configure git hooks to run format and lint automatically on commit
+   make setup-hooks
+   ```
+
+5. **API Documentation (Swagger UI):**
+   The project includes a built-in Swagger UI to explore and test the API visually.
+   1. Start the server (`go run ./cmd/server`)
+   2. Open your web browser and navigate to: [http://localhost:8080/docs/](http://localhost:8080/docs/)
 
 ## Example API Requests
 

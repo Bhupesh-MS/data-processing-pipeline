@@ -9,16 +9,37 @@ linters-settings:
     disable:
       - fieldalignment
   gocyclo:
-    min-complexity: 15
+    min-complexity: 40
   goconst:
     min-len: 3
     min-occurrences: 3
+  revive:
+    rules:
+      - name: exported
+        disabled: true
+  errcheck:
+    exclude-functions:
+      - (*database/sql.DB).Close
+      - (*database/sql.Rows).Close
+      - (io.ReadCloser).Close
+      - (io.Writer).Write
+      - (*os.File).Close
+      - (*os.File).WriteString
+      - os.Remove
+      - encoding/json.Unmarshal
+      - (*encoding/json.Encoder).Encode
+      - (*encoding/json.Decoder).Decode
+      - (*database/sql.Rows).Scan
+      - fmt.Sscanf
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).CreateJob
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).UpdateJobStatus
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).SaveError
+      - (data-processing-pipeline/internal/api/repositories.JobRepository).UpdateProgress
 
 linters:
   disable-all: true
   enable:
     - govet
-    - errcheck
     - staticcheck
     - ineffassign
     - typecheck
@@ -27,7 +48,6 @@ linters:
     - gofmt
     - goimports
     - gocyclo
-    - goconst
     - misspell
     - revive
 

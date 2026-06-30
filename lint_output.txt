@@ -1,0 +1,123 @@
+go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run --fix ./...
+internal/api/services/job_service_test.go:124:16: Error return value of `repo.CreateJob` is not checked (errcheck)
+	repo.CreateJob(context.Background(), job)
+	              ^
+internal/api/services/job_service_test.go:145:16: Error return value of `repo.CreateJob` is not checked (errcheck)
+	repo.CreateJob(context.Background(), &models.Job{ID: "job-1"})
+	              ^
+internal/api/services/job_service_test.go:146:16: Error return value of `repo.CreateJob` is not checked (errcheck)
+	repo.CreateJob(context.Background(), &models.Job{ID: "job-2"})
+	              ^
+internal/api/services/job_service_test.go:208:16: Error return value of `repo.CreateJob` is not checked (errcheck)
+	repo.CreateJob(context.Background(), &models.Job{ID: "job-1"})
+	              ^
+internal/validation/validator.go:12:1: cyclomatic complexity 16 of func `ValidateRecord` is high (> 15) (gocyclo)
+func ValidateRecord(record *models.Record, rules []models.ValidationRule) error {
+^
+internal/ingestion/api.go:31:23: Error return value of `resp.Body.Close` is not checked (errcheck)
+	defer resp.Body.Close()
+	                     ^
+internal/ingestion/ingestion.go:63:20: Error return value of `reader.Close` is not checked (errcheck)
+	defer reader.Close()
+	                  ^
+internal/ingestion/ingestion.go:122:20: Error return value of `reader.Close` is not checked (errcheck)
+	defer reader.Close()
+	                  ^
+internal/pipeline/pipeline.go:63:24: Error return value of `o.repo.UpdateJobStatus` is not checked (errcheck)
+	o.repo.UpdateJobStatus(context.Background(), job.ID, status, errMsg)
+	                      ^
+internal/pipeline/pipeline.go:110:20: Error return value of `p.repo.SaveError` is not checked (errcheck)
+			p.repo.SaveError(context.Background(), errDetail)
+			                ^
+internal/pipeline/pipeline.go:115:26: Error return value of `p.repo.UpdateProgress` is not checked (errcheck)
+				p.repo.UpdateProgress(context.Background(), prog)
+				                     ^
+internal/pipeline/pipeline.go:137:27: Error return value of `p.repo.UpdateProgress` is not checked (errcheck)
+					p.repo.UpdateProgress(context.Background(), prog)
+					                     ^
+internal/pipeline/pipeline.go:205:27: Error return value of `p.repo.UpdateProgress` is not checked (errcheck)
+					p.repo.UpdateProgress(context.Background(), prog)
+					                     ^
+internal/pipeline/pipeline.go:229:24: Error return value of `p.repo.UpdateProgress` is not checked (errcheck)
+		p.repo.UpdateProgress(context.Background(), prog)
+		                     ^
+internal/pipeline/pipeline.go:89:1: cyclomatic complexity 17 of func `(*Pipeline).Run` is high (> 15) (gocyclo)
+func (p *Pipeline) Run(ctx context.Context) error {
+^
+cmd/server/main.go:30:19: Error return value of `store.Close` is not checked (errcheck)
+	defer store.Close()
+	                 ^
+internal/storage/sqlite.go:106:16: Error return value of `json.Unmarshal` is not checked (errcheck)
+	json.Unmarshal([]byte(specStr), &job.Spec)
+	              ^
+internal/storage/sqlite.go:115:18: Error return value of `rows.Close` is not checked (errcheck)
+	defer rows.Close()
+	                ^
+internal/storage/sqlite.go:124:17: Error return value of `json.Unmarshal` is not checked (errcheck)
+		json.Unmarshal([]byte(specStr), &job.Spec)
+		              ^
+internal/storage/sqlite.go:178:18: Error return value of `rows.Close` is not checked (errcheck)
+	defer rows.Close()
+	                ^
+internal/storage/sqlite_test.go:17:19: Error return value of `store.Close` is not checked (errcheck)
+	defer store.Close()
+	                 ^
+internal/storage/sqlite_test.go:11:1: cyclomatic complexity 19 of func `TestSQLiteStore_CRUD` is high (> 15) (gocyclo)
+func TestSQLiteStore_CRUD(t *testing.T) {
+^
+internal/export/export.go:41:17: Error return value of `f.WriteString` is not checked (errcheck)
+			f.WriteString("[\n")
+			             ^
+internal/export/export.go:62:11: Error return value of `f.Close` is not checked (errcheck)
+			f.Close()
+			       ^
+internal/export/export.go:84:13: Error return value of `w.Write` is not checked (errcheck)
+					w.Write(headers)
+					       ^
+internal/export/export.go:113:12: Error return value of `w.Write` is not checked (errcheck)
+				w.Write(row)
+				       ^
+internal/export/export.go:118:15: Error return value of `enc.Encode` is not checked (errcheck)
+				enc.Encode(rec.Attributes)
+				          ^
+internal/export/export.go:42:25: string `sqlite` has 3 occurrences, make it a constant (goconst)
+		} else if exp.Type == "sqlite" && exp.Table != "" && db != nil {
+		                      ^
+internal/export/export.go:14:1: cyclomatic complexity 39 of func `RunExport` is high (> 15) (gocyclo)
+func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *models.ErrorDetails, exports []models.ExportConfig, jobID string, db *sql.DB) {
+^
+internal/export/export.go:54:4: SA9003: empty branch (staticcheck)
+			if exp.Type == "json" {
+			^
+internal/aggregation/aggregator.go:66:16: Error return value of `fmt.Sscanf` is not checked (errcheck)
+					fmt.Sscanf(vt, "%f", &val)
+					          ^
+internal/aggregation/aggregator.go:34:1: cyclomatic complexity 20 of func `processRecord` is high (> 15) (gocyclo)
+func processRecord(rec *models.Record, rules []models.AggregationRule, state map[string]map[string]float64, counts map[string]map[string]int) {
+^
+test/integration/pipeline_test.go:23:11: Error return value of `os.Remove` is not checked (errcheck)
+	os.Remove(dbPath)
+	         ^
+test/integration/pipeline_test.go:24:17: Error return value of `os.Remove` is not checked (errcheck)
+	defer os.Remove(dbPath)
+	               ^
+test/integration/pipeline_test.go:30:19: Error return value of `store.Close` is not checked (errcheck)
+	defer store.Close()
+	                 ^
+test/integration/pipeline_test.go:42:10: Error return value of `w.Write` is not checked (errcheck)
+		w.Write([]byte(mockData))
+		       ^
+test/integration/pipeline_test.go:80:32: Error return value of `(*encoding/json.Decoder).Decode` is not checked (errcheck)
+	json.NewDecoder(w.Body).Decode(&createdJob)
+	                              ^
+test/integration/pipeline_test.go:91:40: Error return value of `(*encoding/json.Decoder).Decode` is not checked (errcheck)
+	json.NewDecoder(wProgress.Body).Decode(&prog)
+	                                      ^
+test/integration/pipeline_test.go:109:12: Error return value of `rows.Scan` is not checked (errcheck)
+		rows.Scan(&stage, &msg)
+		         ^
+test/integration/api_integration_test.go:47:5: shadow: declaration of "err" shadows declaration at line 20 (govet)
+	if err := json.NewDecoder(resp.Body).Decode(&job); err != nil {
+	   ^
+exit status 1
+make: *** [Makefile:10: lint] Error 1

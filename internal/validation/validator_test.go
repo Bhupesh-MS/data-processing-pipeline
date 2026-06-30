@@ -15,7 +15,7 @@ func TestValidateRecord(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "valid record",
+			name:   "valid record",
 			record: &models.Record{Attributes: map[string]any{"age": 25, "name": "John"}},
 			rules: []models.ValidationRule{
 				{Field: "age", Type: "int", Required: true},
@@ -24,7 +24,7 @@ func TestValidateRecord(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "missing required field",
+			name:   "missing required field",
 			record: &models.Record{Attributes: map[string]any{"name": "John"}},
 			rules: []models.ValidationRule{
 				{Field: "age", Type: "int", Required: true},
@@ -32,7 +32,7 @@ func TestValidateRecord(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "invalid type",
+			name:   "invalid type",
 			record: &models.Record{Attributes: map[string]any{"age": "twenty"}},
 			rules: []models.ValidationRule{
 				{Field: "age", Type: "int", Required: true},
@@ -61,7 +61,7 @@ func TestRunValidation(t *testing.T) {
 	close(inCh)
 
 	RunValidation(context.Background(), inCh, outCh, errCh, rules, "job-1")
-	
+
 	close(outCh)
 	close(errCh)
 

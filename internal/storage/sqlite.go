@@ -73,14 +73,14 @@ func (s *SQLiteStore) Close() error {
 
 func (s *SQLiteStore) CreateJob(ctx context.Context, job *models.Job) error {
 	specJSON, _ := json.Marshal(job.Spec)
-	_, err := s.db.ExecContext(ctx, 
+	_, err := s.db.ExecContext(ctx,
 		`INSERT INTO jobs (id, status, spec, error, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
 		job.ID, job.Status, string(specJSON), job.Error, job.CreatedAt, job.UpdatedAt,
 	)
 	if err != nil {
 		return err
 	}
-	
+
 	// Init progress
 	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO progress (job_id, status, percent_complete, records_processed, records_failed, records_total, processing_rate, start_time) 
@@ -92,7 +92,7 @@ func (s *SQLiteStore) CreateJob(ctx context.Context, job *models.Job) error {
 
 func (s *SQLiteStore) GetJob(ctx context.Context, id string) (*models.Job, error) {
 	row := s.db.QueryRowContext(ctx, `SELECT id, status, spec, error, created_at, updated_at FROM jobs WHERE id = ?`, id)
-	
+
 	var job models.Job
 	var specStr string
 	err := row.Scan(&job.ID, &job.Status, &specStr, &job.Error, &job.CreatedAt, &job.UpdatedAt)
@@ -102,7 +102,7 @@ func (s *SQLiteStore) GetJob(ctx context.Context, id string) (*models.Job, error
 		}
 		return nil, err
 	}
-	
+
 	json.Unmarshal([]byte(specStr), &job.Spec)
 	return &job, nil
 }
@@ -146,7 +146,7 @@ func (s *SQLiteStore) UpdateProgress(ctx context.Context, p *models.Progress) er
 
 func (s *SQLiteStore) GetProgress(ctx context.Context, jobID string) (*models.Progress, error) {
 	row := s.db.QueryRowContext(ctx, `SELECT job_id, status, percent_complete, records_processed, records_failed, records_total, processing_rate, start_time, end_time FROM progress WHERE job_id = ?`, jobID)
-	
+
 	var p models.Progress
 	var endTime sql.NullTime
 	err := row.Scan(&p.JobID, &p.Status, &p.PercentComplete, &p.Metrics.RecordsProcessed, &p.Metrics.RecordsFailed, &p.Metrics.RecordsTotal, &p.Metrics.ProcessingRate, &p.StartTime, &endTime)
@@ -190,9 +190,13 @@ func (s *SQLiteStore) GetErrors(ctx context.Context, jobID string) ([]*models.Er
 
 func (s *SQLiteStore) DeleteJob(ctx context.Context, jobID string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM jobs WHERE id = ?`, jobID)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	_, err = s.db.ExecContext(ctx, `DELETE FROM progress WHERE job_id = ?`, jobID)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	_, err = s.db.ExecContext(ctx, `DELETE FROM errors WHERE job_id = ?`, jobID)
 	return err
 }

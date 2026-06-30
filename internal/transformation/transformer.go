@@ -15,7 +15,7 @@ func TransformRecord(record *models.Record, rules []models.TransformRule) error 
 		if !exists || val == nil {
 			continue // skip if missing
 		}
-		
+
 		strVal := fmt.Sprintf("%v", val)
 		var newVal any = val
 
@@ -60,9 +60,9 @@ func RunTransformation(ctx context.Context, inCh <-chan models.Record, outCh cha
 			}
 			if err := TransformRecord(&rec, rules); err != nil {
 				errCh <- &models.ErrorDetails{
-					JobID:   jobID,
-					Stage:   "transformation",
-					Message: err.Error(),
+					JobID:      jobID,
+					Stage:      "transformation",
+					Message:    err.Error(),
 					RecordData: fmt.Sprintf("%v", rec.Attributes),
 				}
 				continue

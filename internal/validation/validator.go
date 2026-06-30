@@ -63,9 +63,9 @@ func RunValidation(ctx context.Context, inCh <-chan models.Record, outCh chan<- 
 			}
 			if err := ValidateRecord(&rec, rules); err != nil {
 				errCh <- &models.ErrorDetails{
-					JobID:   jobID,
-					Stage:   "validation",
-					Message: err.Error(),
+					JobID:      jobID,
+					Stage:      "validation",
+					Message:    err.Error(),
 					RecordData: fmt.Sprintf("%v", rec.Attributes),
 				}
 				continue // skip invalid

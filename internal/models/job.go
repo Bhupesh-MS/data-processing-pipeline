@@ -20,27 +20,27 @@ type SourceConfig struct {
 }
 
 type ValidationRule struct {
-	Field string `json:"field"`
-	Type  string `json:"type"` // "string", "int", "float", "boolean", "date"
-	Required bool `json:"required"`
+	Field    string `json:"field"`
+	Type     string `json:"type"` // "string", "int", "float", "boolean", "date"
+	Required bool   `json:"required"`
 }
 
 type TransformRule struct {
-	Field    string `json:"field"`
-	Action   string `json:"action"` // "lowercase", "uppercase", "trim", "to_int", "to_float"
-	Target   string `json:"target,omitempty"` // target field if renaming/copying
+	Field  string `json:"field"`
+	Action string `json:"action"`           // "lowercase", "uppercase", "trim", "to_int", "to_float"
+	Target string `json:"target,omitempty"` // target field if renaming/copying
 }
 
 type AggregationRule struct {
-	Type   string `json:"type"` // "count", "sum", "avg", "min", "max"
-	Field  string `json:"field"`
+	Type    string   `json:"type"` // "count", "sum", "avg", "min", "max"
+	Field   string   `json:"field"`
 	GroupBy []string `json:"group_by,omitempty"`
 }
 
 type ExportConfig struct {
-	Type   string `json:"type"` // "sqlite", "csv", "json"
-	Path   string `json:"path,omitempty"`
-	Table  string `json:"table,omitempty"`
+	Type  string `json:"type"` // "sqlite", "csv", "json"
+	Path  string `json:"path,omitempty"`
+	Table string `json:"table,omitempty"`
 }
 
 type JobSpec struct {

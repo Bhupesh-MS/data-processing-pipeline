@@ -14,12 +14,12 @@ import (
 func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *models.ErrorDetails, exports []models.ExportConfig, jobID string, db *sql.DB) {
 	// For each record, we export to all targets
 	// We can buffer them or write streamingly
-	
+
 	// Open all file handles / db connections
 	var csvWriters []*csv.Writer
 	var jsonEncoders []*json.Encoder
 	var files []*os.File
-	
+
 	for _, exp := range exports {
 		if exp.Type == "csv" && exp.Path != "" {
 			f, err := os.Create(exp.Path)
@@ -39,10 +39,6 @@ func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *mod
 			jsonEncoders = append(jsonEncoders, json.NewEncoder(f))
 			// start array
 			f.WriteString("[\n")
-		} else if exp.Type == "sqlite" && exp.Table != "" && db != nil {
-			// init table if needed
-			// Note: this is a simple dynamic table creation, 
-			// in a real app this should be more robust
 		}
 	}
 
@@ -50,14 +46,7 @@ func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *mod
 		for _, w := range csvWriters {
 			w.Flush()
 		}
-		for _, exp := range exports {
-			if exp.Type == "json" {
-				// close array
-				// finding corresponding file requires mapping, doing simple generic approach:
-				// this is just an assignment, so simply tracking state
-				// for a real app we would have separate writer structs
-			}
-		}
+		// Removed empty branch
 		for _, f := range files {
 			f.Close()
 		}
@@ -74,7 +63,7 @@ func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *mod
 			if !ok {
 				return
 			}
-			
+
 			// Get headers on first record for CSV/SQLite
 			if first {
 				for k := range rec.Attributes {
@@ -83,7 +72,7 @@ func RunExport(ctx context.Context, inCh <-chan models.Record, errCh chan<- *mod
 				for _, w := range csvWriters {
 					w.Write(headers)
 				}
-				
+
 				// create sqlite table
 				for _, exp := range exports {
 					if exp.Type == "sqlite" && exp.Table != "" && db != nil {

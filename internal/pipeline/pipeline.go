@@ -5,13 +5,13 @@ import (
 	"sync"
 	"time"
 
-	"data-processing-pipeline/internal/models"
-	"data-processing-pipeline/internal/api/repositories"
-	"data-processing-pipeline/internal/ingestion"
-	"data-processing-pipeline/internal/validation"
-	"data-processing-pipeline/internal/transformation"
 	"data-processing-pipeline/internal/aggregation"
+	"data-processing-pipeline/internal/api/repositories"
 	"data-processing-pipeline/internal/export"
+	"data-processing-pipeline/internal/ingestion"
+	"data-processing-pipeline/internal/models"
+	"data-processing-pipeline/internal/transformation"
+	"data-processing-pipeline/internal/validation"
 )
 
 type Orchestrator struct {
@@ -29,7 +29,7 @@ func NewOrchestrator(repo repositories.JobRepository) *Orchestrator {
 
 func (o *Orchestrator) RunJob(job *models.Job) {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	o.mu.Lock()
 	o.activeJobs[job.ID] = cancel
 	o.mu.Unlock()
@@ -48,7 +48,7 @@ func (o *Orchestrator) RunJob(job *models.Job) {
 	// This is where we run the pipeline
 	p := NewPipeline(job, o.repo)
 	err = p.Run(ctx)
-	
+
 	status := models.JobStatusCompleted
 	errMsg := ""
 	if err != nil {
@@ -75,14 +75,14 @@ func (o *Orchestrator) CancelJob(jobID string) error {
 }
 
 type Pipeline struct {
-	job   *models.Job
-	repo  repositories.JobRepository
+	job  *models.Job
+	repo repositories.JobRepository
 }
 
 func NewPipeline(job *models.Job, repo repositories.JobRepository) *Pipeline {
 	return &Pipeline{
-		job:   job,
-		repo:  repo,
+		job:  job,
+		repo: repo,
 	}
 }
 
@@ -150,7 +150,7 @@ func (p *Pipeline) Run(ctx context.Context) error {
 	if workerCount <= 0 {
 		workerCount = 5
 	}
-	
+
 	var valWg sync.WaitGroup
 	for i := 0; i < workerCount; i++ {
 		valWg.Add(1)
@@ -231,4 +231,3 @@ func (p *Pipeline) Run(ctx context.Context) error {
 
 	return nil
 }
-

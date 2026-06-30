@@ -1,0 +1,450 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Data Processing Pipeline API",
+    "description": "API documentation for the Data Processing Pipeline",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Check API Health",
+        "description": "Returns the health status of the API",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pipelines": {
+      "post": {
+        "summary": "Create a new Data Processing Pipeline Job",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobSpec"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      },
+      "get": {
+        "summary": "List all Pipeline Jobs",
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pipelines/{id}": {
+      "get": {
+        "summary": "Get Pipeline Job by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Pipeline Job by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job deleted"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    },
+    "/api/v1/pipelines/{id}/progress": {
+      "get": {
+        "summary": "Get Job Progress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job progress details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    },
+    "/api/v1/pipelines/{id}/errors": {
+      "get": {
+        "summary": "Get Job Errors",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of errors that occurred during the job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ErrorDetails"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    },
+    "/api/v1/pipelines/{id}/cancel": {
+      "patch": {
+        "summary": "Cancel a running Job",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job cancelled"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JobSpec": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceConfig"
+            }
+          },
+          "validations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationRule"
+            }
+          },
+          "transformations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransformRule"
+            }
+          },
+          "aggregations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregationRule"
+            }
+          },
+          "exports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportConfig"
+            }
+          },
+          "worker_count": {
+            "type": "integer",
+            "default": 5
+          }
+        },
+        "required": ["sources", "exports"]
+      },
+      "SourceConfig": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "csv, json, api"
+          },
+          "url": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          }
+        },
+        "required": ["type"]
+      },
+      "ValidationRule": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "string, int, float, boolean, date"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": ["field", "type", "required"]
+      },
+      "TransformRule": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "description": "lowercase, uppercase, trim, to_int, to_float"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": ["field", "action"]
+      },
+      "AggregationRule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "count, sum, avg, min, max"
+          },
+          "field": {
+            "type": "string"
+          },
+          "group_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["type", "field"]
+      },
+      "ExportConfig": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "sqlite, csv, json"
+          },
+          "path": {
+            "type": "string"
+          },
+          "table": {
+            "type": "string"
+          }
+        },
+        "required": ["type"]
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "pending, running, completed, failed, cancelled"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/JobSpec"
+          },
+          "error": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "spec", "created_at", "updated_at"]
+      },
+      "Progress": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "percent_complete": {
+            "type": "number",
+            "format": "double"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/Metrics"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["job_id", "status", "percent_complete", "metrics", "start_time"]
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "records_processed": {
+            "type": "integer"
+          },
+          "records_failed": {
+            "type": "integer"
+          },
+          "records_total": {
+            "type": "integer"
+          },
+          "processing_rate": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["records_processed", "records_failed", "processing_rate"]
+      },
+      "ErrorDetails": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "stage": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "record_data": {
+            "type": "string"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["job_id", "stage", "message", "occurred_at"]
+      }
+    }
+  }
+}

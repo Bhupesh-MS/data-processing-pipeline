@@ -3,11 +3,11 @@
 # Format Go code
 format:
 	gofmt -s -w .
-	goimports -w .
+	go run golang.org/x/tools/cmd/goimports@latest -w .
 
 # Lint Go code using golangci-lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run --fix ./...
 
 # Setup git hooks to use the local .githooks directory
 setup-hooks:
